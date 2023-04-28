@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.domain.post.PostMapper">
+    <sql id="postColumns">
+        id
+        ,title
+        , content
+        , writer
+        , view_cnt
+        , notice_yn
+        , delete_yn
+        , created_date
+        , modified_date
+    </sql>
+
+    <insert id="save" parameterType="com.example.board.domain.post.PostRequest">
+        insert into tb_post
+        (<include refid="postColumns"/>)
+        values (#{id}, #{title}, #{content}, #{writer}, 0, #{noticeYn}, 0, NOW(), null)
+    </insert>
+
+    <select id="findById" parameterType="long" resultType="com.example.board.domain.post.PostResponse">
+        select
+        <include refid="postColumns"/>
+        from tb_post where id = #{value}
+    </select>
+
+    <update id="update" parameterType="com.example.board.domain.post.PostRequest">
+        update tb_post
+        set modified_date = NOW(),
+            title         = #{title},
+            content       = #{content},
+            writer        = #{writer},
+            notice_yn     = #{noticeYn}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        update tb_post
+        set delete_yn = 1
+        where id = #{id}
+    </delete>
+
+    <select id="findAll" resultType="com.example.board.domain.post.PostResponse">
+        select
+        <include refid="postColumns"/>
+        from tb_post
+        where delete_yn =0
+        order by id desc
+    </select>
+
+</mapper>
