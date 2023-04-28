@@ -14,7 +14,8 @@
         , modified_date
     </sql>
 
-    <insert id="save" parameterType="com.example.board.domain.post.PostRequest">
+    <insert id="save" parameterType="com.example.board.domain.post.PostRequest" useGeneratedKeys="true"
+            keyProperty="id">
         insert into tb_post
         (<include refid="postColumns"/>)
         values (#{id}, #{title}, #{content}, #{writer}, 0, #{noticeYn}, 0, NOW(), null)
