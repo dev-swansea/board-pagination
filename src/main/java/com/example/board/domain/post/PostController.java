@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 public class PostController {
 
@@ -27,7 +29,6 @@ public class PostController {
     if (id != null) {
       PostResponse post = service.findPostById(id);
       model.addAttribute("post", post);
-
     }
     return "post/write";
   }
@@ -35,6 +36,36 @@ public class PostController {
   @PostMapping("/post/save.do")
   public String savePost(final PostRequest params) {
     service.savePost(params);
+    return "redirect:/post/list.do";
+  }
+
+  // 전체 리스트
+  @GetMapping("/post/list.do")
+  public String openPostList(Model model) {
+    List<PostResponse> posts = service.findAllPost();
+    model.addAttribute("posts", posts);
+    return "post/list";
+  }
+
+  //  게시글 상세정보
+  @GetMapping("/post/view.do")
+  public String openPostView(@RequestParam final Long id, Model model) {
+    PostResponse post = service.findPostById(id);
+    model.addAttribute("post", post);
+    return "post/view";
+  }
+
+  //  수정
+  @PostMapping("/post/update.do")
+  public String updatePost(final PostRequest params) {
+    service.updatePost(params);
+    return "redirect:/post/list.do";
+  }
+
+  // 물리적 삭제가 아닌 논리 삭제이다.
+  @PostMapping("/post/delete.do")
+  public String deletePost(@RequestParam final Long id) {
+    service.deletePost(id);
     return "redirect:/post/list.do";
   }
 }
