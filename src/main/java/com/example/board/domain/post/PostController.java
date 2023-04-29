@@ -1,14 +1,19 @@
 package com.example.board.domain.post;
 
+import com.example.board.common.dto.MessageDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
+//i  컨트롤러의 게시글 생성/수정/삭제 메서드에서 showMessageAndRedirect( )를 호출해 주기만 하면 됩니다.
 @Controller
+@Slf4j
 public class PostController {
 
   private final PostService service;
@@ -33,10 +38,12 @@ public class PostController {
     return "post/write";
   }
 
+  // 신규 게시글 생성
   @PostMapping("/post/save.do")
-  public String savePost(final PostRequest params) {
+  public String savePost(final PostRequest params, Model model) {
     service.savePost(params);
-    return "redirect:/post/list.do";
+    MessageDto message = new MessageDto("게시글 생성 완료", "/post/list.do", RequestMethod.POST, null);
+    return showMessageAndRedirect(message, model);
   }
 
   // 전체 리스트
@@ -57,15 +64,24 @@ public class PostController {
 
   //  수정
   @PostMapping("/post/update.do")
-  public String updatePost(final PostRequest params) {
+  public String updatePost(final PostRequest params, Model model) {
     service.updatePost(params);
-    return "redirect:/post/list.do";
+    MessageDto message = new MessageDto("글이 수정됨", "/post/list.do", RequestMethod.POST, null);
+    return showMessageAndRedirect(message, model);
   }
 
   // 물리적 삭제가 아닌 논리 삭제이다.
   @PostMapping("/post/delete.do")
-  public String deletePost(@RequestParam final Long id) {
+  public String deletePost(@RequestParam final Long id, Model model) {
     service.deletePost(id);
-    return "redirect:/post/list.do";
+    MessageDto message = new MessageDto("글이 삭제됨", "/post/list.do", RequestMethod.POST, null);
+    return showMessageAndRedirect(message, model);
+  }
+
+  //  사용자에게 메시지를 전달하고 페이지를 리다이렉트
+  private String showMessageAndRedirect(final MessageDto params, Model model) {
+    model.addAttribute("params", params);
+    log.info("messageDto = {} ", params);
+    return "common/messageRedirect";
   }
 }
