@@ -4,6 +4,7 @@ import com.example.board.common.dto.MessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -81,7 +82,6 @@ public class PostController {
   //  사용자에게 메시지를 전달하고 페이지를 리다이렉트
   private String showMessageAndRedirect(final MessageDto params, Model model) {
     model.addAttribute("params", params);
-    log.info("messageDto = {} ", params);
     return "common/messageRedirect";
   }
 }

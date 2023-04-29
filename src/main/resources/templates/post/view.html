@@ -67,7 +67,7 @@
                 return false;
             }
 
-            const formHtml = ` <form id="delete1Form" action="/post/delete.do" method="post"> <<input type="hidden" id="id" name="id" value="${id}"> </form> `;
+            const formHtml = ` <form id="deleteForm" action="/post/delete.do" method="post"> <<input type="hidden" id="id" name="id" value="${id}"> </form> `;
             const doc = new DOMParser().parseFromString(formHtml, "text/html");
             const form = doc.firstChild;
             document.body.append(form);
