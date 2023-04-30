@@ -13,7 +13,7 @@
     <appender name="console-infolog" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <charset>UTF-8</charset>
-            <Pattern>%d %5p %m%n</Pattern>
+            <Pattern>%d %5p [%c] %m%n</Pattern>
             <pattern>[%thread] %highlight(%-5level) %cyan(%logger{15}) -%kvp -%msg %n</pattern>
         </encoder>
     </appender>
