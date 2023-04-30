@@ -1,5 +1,6 @@
 package com.example.board.domain.post;
 
+import com.example.board.common.dto.SearchDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,8 +66,8 @@ public class PostService {
    *
    * @return 게시글 리스트
    */
-  public List<PostResponse> findAllPost() {
-    return mapper.findAll();
+  public List<PostResponse> findAllPost(final SearchDto params) {
+    return mapper.findAll(params);
   }
 
 }

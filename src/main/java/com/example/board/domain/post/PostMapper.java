@@ -1,5 +1,6 @@
 package com.example.board.domain.post;
 
+import com.example.board.common.dto.SearchDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -41,13 +42,14 @@ public interface PostMapper {
    *
    * @return 게시글 리스트
    */
-  List<PostResponse> findAll();
+  List<PostResponse> findAll(SearchDto params);
 
   /**
    * 게시글 수 카운팅
    *
    * @return 게시글 수
    */
-  int count();
-
+  int count(SearchDto params);
 }
+
+// 페이징을 위해 findAll과 count에 파라미터를 넘겨준다.
