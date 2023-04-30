@@ -43,12 +43,22 @@
         where id = #{id}
     </delete>
 
-    <select id="findAll" resultType="com.example.board.domain.post.PostResponse">
+    <!--  SearchDto 매개변수 생겼쥬?  -->
+    <select id="findAll" parameterType="com.example.board.common.dto.SearchDto"
+            resultType="com.example.board.domain.post.PostResponse">
         select
         <include refid="postColumns"/>
         from tb_post
         where delete_yn =0
         order by id desc
+        LIMIT #{offset}, #{recordSize}
+    </select>
+
+    <!--    게시글 수 카운팅-->
+    <select id="count" parameterType="com.example.board.common.dto.SearchDto" resultType="int">
+        select count(*)
+        from tb_post
+        where delete_yn = 0
     </select>
 
 </mapper>

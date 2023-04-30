@@ -1,14 +1,11 @@
 package com.example.board.domain.post;
 
 import com.example.board.common.dto.MessageDto;
+import com.example.board.common.dto.SearchDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,8 +46,9 @@ public class PostController {
 
   // 전체 리스트
   @GetMapping("/post/list.do")
-  public String openPostList(Model model) {
-    List<PostResponse> posts = service.findAllPost();
+  public String openPostList(Model model, @ModelAttribute("parmas") final SearchDto params) {
+    // ModelAttribute라 아래 두개는 필요없을듯?
+    List<PostResponse> posts = service.findAllPost(params);
     model.addAttribute("posts", posts);
     return "post/list";
   }
