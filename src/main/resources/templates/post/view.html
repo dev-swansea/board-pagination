@@ -45,18 +45,47 @@
                 </tr>
                 </tbody>
             </table>
+            <!--상세 페이지 버튼 영역 수정하기-->
+            <!--이제, 상세 페이지에서 "수정" 버튼과 "뒤로" 버튼을 클릭했을 때 이전 페이지 정보가 유지되도록 해주어야 합니다. 우선 view.html의 버튼 영역을 다음과 같이 변경해 주세요.-->
+            <!--a 태그에서 다 버튼으로 변경-->
             <p class="btn_set">
-                <a th:href="@{/post/write.do( id=${post.id} )}" class="btns btn_bdr4 btn_mid">수정</a>
-                <button type="button" onclick="deletePost();" class="btns btn_bdr1 btn_mid">삭제</button>
-                <a th:href="@{/post/list.do}" class="btns btn_bdr3 btn_mid">뒤로</a>
+                <button type="button" onclick="goWritePage()" class="btns btn_bdr4 btn_mid">수정</button>
+                <button type="button" onclick="deletePost()" class="btns btn_bdr1 btn_mid">삭제</button>
+                <button type="button" onclick="goListPage()" class="btns btn_bdr3 btn_mid">뒤로</button>
             </p>
         </section>
     </div> <!--/* .content */-->
+
+
 </th:block>
 
 <th:block layout:fragment="script">
     <script th:inline="javascript">
         /*<![CDATA[*/
+
+        // 게시글 수정 페이지 이동
+        const goWritePage = () => {
+            /*
+            * 앞에서 말씀드렸듯이 location.search는 URL의 쿼리 스트링을 리턴해 주는데요.
+            * 리스트 페이지에서 전달받은 쿼리 스트링을 있는 그대로 수정 페이지로 전달해 주면 되기 때문에
+            * URI 경로(Path)만 view.do에서 write.do로 변경되고, * 나머지 쿼리 스트링은 그대로 가지고 갑니다.
+            * */
+            location.href = "/post/write.do" + location.search;
+        }
+
+        // 게시글 리스트 페이지로 이동
+        const goListPage = () => {
+            /*
+            * new URLSearchParams( )를 이용해서 쿼리 스트링을 객체화합니다.
+            * 리스트 페이지는 게시글 번호(id)를 필요로 하지 않기 때문에 delete( ) 함수를 이용해서 게시글 번호(id)를 삭제한 후
+            * 나머지 쿼리 스트링(이전 페이지 정보)을 리스트 페이지로 전달합니다.
+            * 이거 안하면 어느 페이지에서든 뒤로가기를 하면 1로 이동함
+            * */
+            const queryString = new URLSearchParams(location.search);
+            queryString.delete("id"); // 굳이 없어도 되긴 하지만
+            location.href = "/post/list.do" + "?" + queryString.toString();
+        }
+
         <!--  게시글 삭제 -->
         const deletePost = () => {
             const id = [[${post.id}]]
@@ -67,7 +96,24 @@
                 return false;
             }
 
-            const formHtml = ` <form id="deleteForm" action="/post/delete.do" method="post"> <<input type="hidden" id="id" name="id" value="${id}"> </form> `;
+            let inputHtml = "";
+
+
+            new URLSearchParams(location.search).forEach((value, key) => {
+                inputHtml += `<input type="hidden" name="${key}" value="${value}">`
+            })
+
+            const formHtml = `
+                <form id="deleteForm" action="/post/delete.do" method="post">
+                    ${inputHtml}
+                </form>
+
+`;
+            /*
+            * 기존에는 deleteForm을 그릴 때 게시글 번호만 hidden 파라미터로 추가했는데요. 지금은 전달받은 쿼리 스트링 파라미터를 전부 inputHtml에 담아서 폼에 추가해 주는 구조로 변경되었습니다.
+            * 참고로, 게시글 번호(id)도 쿼리 스트링에 포함되어 있기 때문에 따로 추가해주지 않아도 됩니다
+            * */
+
             const doc = new DOMParser().parseFromString(formHtml, "text/html");
             const form = doc.firstChild;
             document.body.append(form);
