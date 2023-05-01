@@ -54,7 +54,7 @@
         LIMIT #{pagination.limitStart}, #{recordSize}
     </select>
 
-    <!--    게시글 수 카운팅-->
+    <!--    게시글 수 카운팅, 파라미터 사실상 필요없다 ㅋ-->
     <select id="count" parameterType="com.example.board.common.dto.SearchDto" resultType="int">
         select count(*)
         from tb_post
