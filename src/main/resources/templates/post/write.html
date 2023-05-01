@@ -60,9 +60,10 @@
                     </tbody>
                 </table>
             </form>
+            <!--마찬가지로 이전 정보를 유지해야 된다.-->
             <p class="btn_set">
-                <button type="button" id="saveBtn" onclick="savePost();" class="btns btn_st3 btn_mid">저장</button>
-                <a th:href="@{/post/list.do}" class="btns btn_bdr3 btn_mid">뒤로</a>
+                <button type="button" id="saveBtn" onclick="savePost()" class="btns btn_st3 btn_mid">저장</button>
+                <button type="button" onclick="goViewPage()" class="btns btn_bdr3 btn_mid">뒤로</button>
             </p>
         </section>
     </div> <!-- content end -->
@@ -73,6 +74,11 @@
         /*<![CDATA[*/
         window.onload = () => {
             renderPostInfo();
+        }
+
+        // 수정에서 뒤로가기 눌렀을 때,
+        const goViewPage = () => {
+            location.href = "/post/view.do" + location.search;
         }
 
         // 게시글 상세정보 렌더링(수정시)
@@ -113,7 +119,7 @@
             // 설정 label에 접근
             // 공지글 설정이 체크되어 있으면 true, 아니면 false로 hidden 타입의 noticeYn 필드 값이 세팅됩니다.
             form.noticeYn.value = form.isNotice.checked;
-            form.action = [[${post == null}]] ? "/post/save.do" : "/post/update.do"
+            form.action = [[${post == null}]] ? "/post/save.do" : "/post/update.do" + location.search;
             form.submit();
         }
         /*]]>*/
