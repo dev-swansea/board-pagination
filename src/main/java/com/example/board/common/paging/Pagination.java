@@ -39,15 +39,13 @@ public class Pagination {
     }
 
     // 첫 페이지 번호 계산
-    startPage = ((params.getPage() - 1) / params.getPageSize()) * params.getPageSize();
-    System.out.println(" 이 페이지 ? --> " + (params.getPage() - 1) / params.getPageSize());
+    startPage = ((params.getPage() - 1) / params.getPageSize()) * params.getPageSize() + 1;
 
     // 끝 페이지 번호 계산 => 1부터 시작이라 -1인가?..
     endPage = startPage + params.getPageSize() - 1;
 
     //  끝 페이지가 전페 페이지 수보다 큰 경우, 끝 페이지에 전체 페이지 수 저장
     if (endPage > totalPageCount) {
-      System.out.println("totalPageCount => " + totalPageCount);
       endPage = totalPageCount;
     }
 
@@ -64,6 +62,7 @@ public class Pagination {
      * 이전 페이지가 존재한다는 걸 의미합니다.
      * */
     existPrevPage = startPage != 1;
+    System.out.println("existPrevPage => " + existPrevPage);
 
     // 다음 페이지 존재 여부 확인
     /*
@@ -72,6 +71,6 @@ public class Pagination {
      * 만약 totalRecordCount(전체 데이터 개수)가 105개라면, 다음 페이지가 존재한다는 걸 의미합니다
      * */
     existNextPage = (endPage * params.getRecordSize()) < totalRecordCount;
-
+    System.out.println("existNextPage => " + existNextPage);
   }
 }
