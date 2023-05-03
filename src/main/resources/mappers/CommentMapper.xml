@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.domain.comment.CommentMapper">
+    <sql id="commentColums">
+        id, post_id, content, writer, delete_yn, created_date,modified_date
+    </sql>
+
+    <!--댓글 저장-->
+    <insert id="save" parameterType="com.example.board.domain.comment.CommentRequest" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into tb_comment (<include refid="commentColums"/>)
+        values(#{id},#{postId},#{content},#{writer},0,NOW(),NULL)
+    </insert>
+
+    <!-- 댓글 상세정보 조회-->
+    <select id="findById" parameterType="long" resultType="com.example.board.domain.comment.CommentResponse">
+        select
+        <include refid="commentColums"/>
+        from tb_comment
+        where id = #{value}
+    </select>
+
+    <!-- 댓글 수정-->
+    <update id="update" parameterType="com.example.board.domain.comment.CommentRequest">
+        update tb_comment
+        set modified_date=NOW(),
+            content      =#{content},
+            writer       = #{writer}
+        where id = #{id}
+    </update>
+
+    <!-- 댓글 삭제 -->
+    <update id="deleteById" parameterType="long">
+        update tb_comment
+        set delete_yn = 1
+        where id = #{id}
+    </update>
+
+    <!-- 댓글 리스트 조회-->
+    <select id="findAll" resultType="com.example.board.domain.comment.CommentResponse" parameterType="long">
+        select
+        <include refid="commentColums"/>
+        from tb_comment
+        where delete_yn = 0 ANd post_id =#{value}
+        order by id desc
+    </select>
+
+</mapper>

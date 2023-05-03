@@ -53,7 +53,21 @@
                 <button type="button" onclick="deletePost()" class="btns btn_bdr1 btn_mid">삭제</button>
                 <button type="button" onclick="goListPage()" class="btns btn_bdr3 btn_mid">뒤로</button>
             </p>
+
+            <!--  댓글 작성  -->
+            <div class="cm_write">
+                <fieldset>
+                    <legend class="skip_info">댓글 입력</legend>
+                    <div class="com_input">
+                        <p><textarea name="content" id="content" cols="90" rows="4" onkeyup="countingLength(this)"
+                                     placeholder="댓글 입력"></textarea></p>
+                        <span><button type="button" class="btns" onclick="saveComment()">등록</button> <i id="counter">0/300자</i></span>
+                    </div>
+                </fieldset>
+            </div>
         </section>
+        <!-- 댓글 작성 영역 -->
+        <div class="cm_list"></div>
     </div> <!--/* .content */-->
 
 
@@ -62,6 +76,106 @@
 <th:block layout:fragment="script">
     <script th:inline="javascript">
         /*<![CDATA[*/
+
+        window.onload = () => {
+            findAllComment();
+        }
+
+        // 전체 댓글 조회
+        //  댓글을 등록하는 saveComment( )는 저장할 댓글 정보를 서버로 전송하기 위해 data와 contentType 옵션이 사용되었지만,
+        // URI와 요청 메서드만으로 자원(Resource)을 조회할 수 있습니다.
+        const findAllComment = () => {
+            const postId = [[${post.id}]]
+
+            $.ajax({
+                url: `/posts/${postId}/comments`,
+                type: "GET",
+                dataType: "JSON",
+                async: false,
+                success: result => {
+                    // result는 findAllComment( )가 리턴하는 List 타입의 객체배열입니다.
+                    // 1. 조회된 데이터가 없는 경우
+                    if (!result.length) {
+                        document.querySelector(".cm_list").innerHTML = `<div class="cm_none"><p>등록된 댓글이 없습니다.</p></div>`
+                        return false;
+                    }
+
+                    // 2. 렌더링 할 HTML을 저장할 변수
+                    let commentHtml = "";
+
+                    // 3. 댓글 HTML 추가
+                    result.forEach(row => {
+                        commentHtml += `
+                       <div>
+                       <span class="writer_img">
+                       <img src="/images/default_profile.png" alt="기본 사진" width="30" height="30">
+                       </span>
+                       <p class="writer">
+                       <em>${row.writer}</em>
+                       <span class="data">${dayjs(row.createdDate).format("YYYY-MM-DD HH:mm")}</span>
+</p>
+<div class="cont"><div class="txt_con">${row.content}</div></div>
+<p class="func_btns"></p>
+<button class="btns" type="button"><span class="icons icon_modify">수정</span></button>
+<button class="btns" type="button"><span class="icons icon_del">삭제</span></button>
+                      </div>
+                      `;
+                    })
+
+                    // 4. class가 "cm_list"인 요소를 찾아 html 렌더
+                    document.querySelector(".cm_list").innerHTML = commentHtml;
+                },
+                error: (request, status, error) => {
+                    console.log(error)
+                }
+            })
+        }
+
+        // 댓글 길이 카운팅
+        const countingLength = (content) => {
+            if (content.value.length > 300) {
+                alert("댓글을 300자 이하로")
+                // 301자 일때
+                content.value = content.value.substring(0, 300);
+                content.focus();
+            }
+            document.getElementById("counter").innerText = content.value.length + "/300자";
+        }
+
+        // 댓글 저장
+        const saveComment = () => {
+            const content = document.getElementById("content");
+            isValid(content, "댓글");
+
+            const postId = [[${post.id}]];
+            const params = {
+                postId: postId,
+                content: content.value,
+                writer: "이수완"
+            }
+
+            $.ajax({
+                url: `/posts/${postId}/comments`,
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(params),
+                async: false,
+                success: result => {
+                    // 초기화 해준다.
+                    alert("댓글 쓰기 완료");
+                    content.value = "";
+                    document.getElementById("counter").innerText = "0/300자";
+                    // 댓글 쓰고 불러오기 전체
+                    findAllComment();
+                },
+                error: (request, status, error) => {
+                    console.log(error)
+                }
+
+            })
+
+        }
 
         // 게시글 수정 페이지 이동
         const goWritePage = () => {
