@@ -154,6 +154,10 @@
             const currentPage = Array.from(paging.querySelectorAll('a')).find(a => (Number(a.text) === page || Number(a.text) === pagination.totalPageCount));
             currentPage.classList.add("on");
             currentPage.removeAttribute("onclick");
+
+            // 페이지 URI 강제 변경 (현재 페이지 유지)
+            const postId = new URLSearchParams(location.search).get("id");
+            history.replaceState({}, '', location.pathname + `?id=${postId}&page=${currentPage.text}`);
         }
 
         //  댓글 HTML을 화면에 렌더링 합니다.
@@ -234,8 +238,15 @@
         // URI와 요청 메서드만으로 자원(Resource)을 조회할 수 있습니다.
         const
             findAllComment = (page) => {
-                const currentPage = document.querySelector(".paging a.on")
-                page = (page) ? page : (currentPage ? Number(currentPage.text) : 1);
+                //const currentPage = document.querySelector(".paging a.on")
+                //page = (page) ? page : (currentPage ? Number(currentPage.text) : 1);
+                const urlPage = new URLSearchParams(location.search).get("page");
+                // Number를 안해주면 에러나면서 on 활성화가 안됨 ... -> 아, url은 스트링이지..
+                page = (page) ? page : (urlPage ? Number(urlPage) : 1);
+                /*
+                * 함수에서 최상단 두 줄의 코드만 변경되었는데요. 기존에는 113~114번 라인의 코드를 통해 페이지네이션에서 활성화(on) 된 페이지 번호(currentPage)를 기준으로 page를 세팅했으나,
+                * 이제는 주소(URL)에서 페이지 번호를 찾을 수 있으니 쿼리 스트링 상의 페이지 번호(uriPage)를 기준으로 page를 세팅해야 합니다.
+                * */
 
                 const postId = [[${post.id}]]
                 const uri = `/posts/${postId}/comments`;
