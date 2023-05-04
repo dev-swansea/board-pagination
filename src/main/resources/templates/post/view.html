@@ -68,6 +68,8 @@
         </section>
         <!-- 댓글 작성 영역 -->
         <div class="cm_list"></div>
+        <!--    페이지네이션 렌더링 영역-->
+        <div class="paging"></div>
     </div> <!--/* .content */-->
 
     <!--  댓글 수정 모달  -->
@@ -110,29 +112,92 @@
             findAllComment();
         }
 
+        // 페이지네이션 HTML draw => 페이징 HTML을 화면에 렌더링(list의 drawPage와 약간의 차이가 존재
+        const drawPage = (pagination, page) => {
+            // 1. 필수 파라미터가 없는 경우, 페이지네이션 HTML을 제거한 후 로직 종료
+            if (!pagination || !page) {
+                document.querySelector(".paging").innerHTML = "";
+                throw new Error("Missing required Parameters..");
+            }
+
+            // 2. 페이지네이션 HTML을 그릴 변수
+            let html = "";
+
+            // 3. 첫/이전 페이지 버튼 추가
+            if (pagination.existPrevPage) {
+                html += `
+                <a href="javascript:void(0)" onclick="findAllComment(1)" class="page_bt first">첫 페이지</a>
+                <a href="javascript:void(0)" onclick="findAllComment(${pagination.startPage - 1})" class="page_bt prev">이전 페이지</a>
+                `
+            }
+
+            // 4. 페이지 번호 추가
+            html += "<p>";
+            for (let i = pagination.startPage; i <= pagination.endPage; i++) {
+                html += `<a href="javascript:void(0)" onclick="findAllComment(${i})">${i}</a>`
+            }
+            html += "</p>"
+
+            // 5. 다음/끝 페이지 버튼 추가
+            if (pagination.existNextPage) {
+                html += `
+                <a href="javsscript:void(0)" onclick="findAllComment(${pagination.endPage + 1})" class="page_bt next">다음 페이지</a>
+                <a href="javsscript:void(0)" onclick="findAllComment(${pagination.totalPageCount})" class="page_bt last">마지막 페이지</a>
+                `
+            }
+
+            // 6. <div class="paging"></div> 태그에 변수 html에 담긴 내용을 렌더링
+            const paging = document.querySelector(".paging");
+            paging.innerHTML = html;
+
+            // 7. 사용자가 클릭한 페이지 번호(page) 또는 끝 번호(totalPageCount)에 해당되는 a태그를 찾아 활성화 처리한 후 클릭 이벤트 제거
+            const currentPage = Array.from(paging.querySelectorAll('a')).find(a => (Number(a.text) === page || Number(a.text) === pagination.totalPageCount));
+            currentPage.classList.add("on");
+            currentPage.removeAttribute("onclick");
+        }
+
+        //  댓글 HTML을 화면에 렌더링 합니다.
+        // 파라미터명을 제외하고는 기존 findAllComment( )의 메인 로직과 완전히 동일합니다.
+        const drawComments = list => {
+            if (!list.length) {
+                document.querySelector(".cm_list").innerHTML = `
+                <div class="cm_none"><p>등록된 댓글이 없습니다.</p></div>
+                `
+                return false;
+            }
+            let commentHtml = "";
+
+            list.forEach(row => {
+                commentHtml += `
+                <div>
+                <span class="writer_img"><img src="/images/default_profile.png" width="30" height="30" alt="기본 이미지"></span>
+                <p class="writer">
+                <em>${row.writer}</em>
+                <span class="date">${dayjs(row.createdDate).format("YYYY-MM-DD HH:mm")}</span>
+                </p>
+                <div class="cont"><div class="txt_con">${row.content}</div></div>
+                <p class="func_btns">
+                <button onclick="openCommentUpdatePopup(${row.id})" class="btns"><span class="icons icon_modify">수정</span></button>
+                <button onclick="deleteComment(${row.id})" class="btns"><span class="icons icon_del">삭제</span></button>
+                </p>
+                </div>
+                `;
+            })
+            document.querySelector(".cm_list").innerHTML = commentHtml;
+        }
+
         // 댓글 수정 Popup
         /*
         * 모든 댓글은 PK(id)를 기준으로 UPDATE 되기 때문에, 팝업이 열리는 시점에 수정 버튼에 댓글의 id를 전달해 주어야 합니다.
         * */
         const openCommentUpdatePopup = (id) => {
             const postId = [[${post.id}]]
-
-            $.ajax({
-                url: `/posts/${postId}/comments/${id}`,
-                type: "GET",
-                dataType: "JSON",
-                async: false,
-                success: result => {
-                    document.getElementById("modalWriter").value = result.writer;
-                    document.getElementById("modalContent").value = result.content;
-                    document.getElementById("commentUpdateBtn").setAttribute("onclick", `updateComment(${id})`)
-                    layerPop("commentUpdatePopup");
-                    // layerPop( ) 함수는 기존에 common.js에 선언되어 있던 함수로, 화면에 레이어 팝업을 띄워주는 기능을 합니다.
-                },
-                error: (request, status, error) => {
-                    console.log(error);
-                }
-            })
+            const uri = `/posts/${postId}/comments/${id}`;
+            const result = getJson(uri);
+            document.getElementById("modalWriter").value = result.writer;
+            document.getElementById("modalContent").value = result.content;
+            document.getElementById("commentUpdateBtn").setAttribute("onclick", `updateComment(${id})`)
+            layerPop("commentUpdatePopup");
         }
 
         // 댓글 수정 버튼 눌렀을 때 수정
@@ -142,28 +207,17 @@
             isValid(writer, "작성자");
             isValid(content, "수정할 내용");
             const postId = [[${post.id}]]
+            const uri = `/posts/${postId}/comments/${id}`;
             const params = {
-                id: id,
-                postId: postId,
+                id     : id,
+                postId : postId,
                 content: content.value,
-                writer: writer.value
+                writer : writer.value
             }
-            $.ajax({
-                url: `/posts/${postId}/comments/${id}`,
-                type: "patch",
-                contentType: "application/json; charset=utf-8",
-                dataType: "JSON",
-                async: false,
-                data: JSON.stringify(params),
-                success: result => {
-                    alert("수정되었다.");
-                    closeCommentUpdatePopup();
-                    findAllComment();
-                },
-                error: (request, status, error) => {
-                    console.log(error)
-                }
-            })
+            callApi(uri, "patch", params);
+            alert("수정됨");
+            closeCommentUpdatePopup();
+            findAllComment();
         }
 
         // 댓글 수정 팝업 close
@@ -179,52 +233,36 @@
         //  댓글을 등록하는 saveComment( )는 저장할 댓글 정보를 서버로 전송하기 위해 data와 contentType 옵션이 사용되었지만,
         // URI와 요청 메서드만으로 자원(Resource)을 조회할 수 있습니다.
         const
-            findAllComment = () => {
+            findAllComment = (page) => {
+                const currentPage = document.querySelector(".paging a.on")
+                page = (page) ? page : (currentPage ? Number(currentPage.text) : 1);
+
                 const postId = [[${post.id}]]
+                const uri = `/posts/${postId}/comments`;
+                const params = {
+                    page      : page,
+                    recordSize: 5,
+                    pageSize  : 10,
+                    postId    : postId
+                }
 
-                $.ajax({
-                    url: `/posts/${postId}/comments`,
-                    type: "GET",
-                    dataType: "JSON",
-                    async: false,
-                    success: result => {
-                        // result는 findAllComment( )가 리턴하는 List 타입의 객체배열입니다.
-                        // 1. 조회된 데이터가 없는 경우
-                        if (!result.length) {
-                            document.querySelector(".cm_list").innerHTML = `<div class="cm_none"><p>등록된 댓글이 없습니다.</p></div>`
-                            return false;
-                        }
-
-                        // 2. 렌더링 할 HTML을 저장할 변수
-                        let commentHtml = "";
-
-                        // 3. 댓글 HTML 추가
-                        result.forEach(row => {
-                            commentHtml += `
-                       <div>
-                       <span class="writer_img">
-                       <img src="/images/default_profile.png" alt="기본 사진" width="30" height="30">
-                       </span>
-                       <p class="writer">
-                       <em>${row.writer}</em>
-                       <span class="data">${dayjs(row.createdDate).format("YYYY-MM-DD HH:mm")}</span>
-</p>
-<div class="cont"><div class="txt_con">${row.content}</div></div>
-<p class="func_btns"></p>
-<button class="btns" type="button" onclick="openCommentUpdatePopup(${row.id})"><span class="icons icon_modify">수정</span></button>
-<button class="btns" type="button"><span class="icons icon_del">삭제</span></button>
-                      </div>
-                      `;
-                        })
-
-                        // 4. class가 "cm_list"인 요소를 찾아 html 렌더
-                        document.querySelector(".cm_list").innerHTML = commentHtml;
-                    },
-                    error: (request, status, error) => {
-                        console.log(error)
-                    }
-                })
+                const result = getJson(uri, params);
+                const pagination = result.pagination;
+                drawComments(result.list);
+                drawPage(pagination, page);
             }
+        // 댓글 삭제
+        const deleteComment = (id) => {
+            if (!confirm("댓글 삭제할까요?")) {
+                return false;
+            }
+            const postId = [[${post.id}]];
+            const uri = `/posts/${postId}/comments/${id}`;
+            callApi(uri, "delete");
+            alert("삭제됨")
+            findAllComment();
+        }
+
 
         // 댓글 길이 카운팅
         const countingLength = (content) => {
@@ -237,39 +275,23 @@
             document.getElementById("counter").innerText = content.value.length + "/300자";
         }
 
-        // 댓글 저장
+        // 댓글 저장, function.js 사용
         const saveComment = () => {
             const content = document.getElementById("content");
             isValid(content, "댓글");
 
             const postId = [[${post.id}]];
+            const uri = `/posts/${postId}/comments`;
             const params = {
-                postId: postId,
+                postId : postId,
                 content: content.value,
-                writer: "이수완"
+                writer : "이수완"
             }
-
-            $.ajax({
-                url: `/posts/${postId}/comments`,
-                type: 'POST',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(params),
-                async: false,
-                success: result => {
-                    // 초기화 해준다.
-                    alert("댓글 쓰기 완료");
-                    content.value = "";
-                    document.getElementById("counter").innerText = "0/300자";
-                    // 댓글 쓰고 불러오기 전체
-                    findAllComment();
-                },
-                error: (request, status, error) => {
-                    console.log(error)
-                }
-
-            })
-
+            callApi(uri, "POST", params);
+            alert("저장됨")
+            content.value = "";
+            document.getElementById("counter").innerText = "0/300자";
+            findAllComment(1);
         }
 
         // 게시글 수정 페이지 이동

@@ -1,10 +1,8 @@
 package com.example.board.domain.comment;
 
 
-import lombok.RequiredArgsConstructor;
+import com.example.board.common.paging.PagingResponse;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 public class CommentController {
@@ -22,9 +20,10 @@ public class CommentController {
     return service.findCommentById(id);
   }
 
+  // 댓글 리스트 조회
   @GetMapping("/posts/{postId}/comments")
-  public List<CommentResponse> findAllComment(@PathVariable final long postId) {
-    return service.findAllComment(postId);
+  public PagingResponse<CommentResponse> findAllComment(@PathVariable final long postId, final CommentSearchDto params) {
+    return service.findAllComment(params);
   }
 
   // 댓글 상세정보 조회
@@ -49,6 +48,21 @@ public class CommentController {
      * 댓글 수정이 완료되면 수정된 댓글 정보(객체)를 리턴해 주는데요.
      * saveComment( )와 마찬가지로 @RequestBody를 이용해서 JSON 문자열로 넘어오는 댓글 정보를
      * CommentRequest 객체의 각 멤버 변수에 매핑(바인딩)합니다.
+     * */
+  }
+
+  //  댓글 삭제
+  @DeleteMapping("/posts/{postId}/comments/{id}")
+  public Long deleteComment(@PathVariable final Long id, @PathVariable final Long postId) {
+    return service.deleteComment(id);
+    /*
+     * REST API 설계 규칙에서 다큐먼트(Document)에 해당되는 기능으로,
+     * 특정 게시글(postId)에 등록된 모든 댓글 중 PK(id)에 해당되는 댓글을 삭제합니다.
+     * 삭제 프로세스가 완료되면 삭제된 댓글의 PK(id)를 리턴합니다.
+     *  @PathVariable final Long postId 없어도 되긴 하네?
+     *
+     * 게시글과 마찬가지로 delete_yn 칼럼의 상태값을 변경하는 논리 삭제 방식이며,
+     * 삭제가 완료된 후 findAllComment( )로 댓글을 다시 조회합니다.
      * */
   }
 }

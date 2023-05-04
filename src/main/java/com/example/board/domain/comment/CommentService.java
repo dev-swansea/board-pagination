@@ -1,9 +1,12 @@
 package com.example.board.domain.comment;
 
+import com.example.board.common.paging.Pagination;
+import com.example.board.common.paging.PagingResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -65,11 +68,23 @@ public class CommentService {
   /**
    * 댓글 리스트 조회
    *
-   * @param postId - 게시글 번호(FK)
-   * @return 특정 게시글에 등록된 댓글 리스트
+   * @param params - Search conditions
+   * @return list & pagination infomation
    */
-  public List<CommentResponse> findAllComment(final Long postId) {
-    return mapper.findAll(postId);
+  public PagingResponse<CommentResponse> findAllComment(final CommentSearchDto params) {
+    int count = mapper.count(params);
+    if (count < 1) {
+      return new PagingResponse<>(Collections.emptyList(), null);
+    }
+    Pagination pagination = new Pagination(count, params);
+    List<CommentResponse> list = mapper.findAll(params);
+    return new PagingResponse<>(list, pagination);
+
+    /*
+     * PostService의 findAllPost( )와 거의 동일한 로직입니다. findAllComment( )는 params에 계산된 페이지 정보(pagination)를 저장하는 로직이 없는데요.
+     *  이 로직은 페이징이 필요한 모든 기능에서 공통으로 사용되는 로직이기 때문에 Pagination 생성자에서 처리해 주는 게 나을 듯합니다.
+     * */
+
   }
 }
 

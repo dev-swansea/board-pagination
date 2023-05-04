@@ -38,12 +38,22 @@
     </update>
 
     <!-- 댓글 리스트 조회-->
-    <select id="findAll" resultType="com.example.board.domain.comment.CommentResponse" parameterType="long">
+    <select id="findAll" parameterType="com.example.board.domain.comment.CommentSearchDto"
+            resultType="com.example.board.domain.comment.CommentResponse">
         select
         <include refid="commentColums"/>
         from tb_comment
-        where delete_yn = 0 ANd post_id =#{value}
+        where delete_yn = 0 ANd post_id =#{postId}
         order by id desc
+        LIMIT #{pagination.limitStart},#{recordSize}
+    </select>
+
+    <!--  댓글 수 카운팅  -->
+    <select id="count" parameterType="com.example.board.domain.comment.CommentSearchDto" resultType="int">
+        select count(*)
+        from tb_comment
+        where delete_yn = 0
+          AND post_id = #{postId}
     </select>
 
 </mapper>

@@ -15,13 +15,12 @@ public class Pagination {
   private boolean existNextPage; // 다음 페이지 존재 여부
 
   public Pagination(int totalRecordCount, SearchDto params) {
-    /*
-     * COUNT(*) 쿼리의 실행 결과, 즉 전체 게시글 개수를 의미합니다. 당장은 테이블에서 삭제되지 않은 데이터를 기준으로 카운팅 하지만,
-     *  검색 기능이 적용된 후에는 검색 조건의 유무에 따라 필터링해서 카운팅합니다.
-     * */
     if (totalRecordCount > 0) {
       this.totalRecordCount = totalRecordCount;
       calculator(params);
+      params.setPagination(this); // 마지막 로직을 통해 params에 계산된 페이지 정보(this)를 저장합니다.
+      // 기존에는 서비스에서 처리되던 로직이 Pagination 객체가 생성되는 시점에 실행되도록 변경한 건데요.
+      // Pagination으로 책임을 전가함으로써 페이징 적용에 필요한 비즈니스 로직 한 줄이 줄어들었습니다. (코드 리팩터링)
     }
   }
 
