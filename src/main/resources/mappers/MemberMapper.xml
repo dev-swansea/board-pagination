@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.domain.member.MemberMapper">
+
+    <sql id="memberColumns">
+        id,login_id,password,name,gender,birthday,delete_yn,created_date,modified_date
+    </sql>
+
+    <insert id="save" parameterType="com.example.board.domain.member.MemberRequest" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into tb_member(<include refid="memberColumns"/>)
+        values(#{id},#{loginId},#{password},#{name},#{gender},#{birthday},0,NOW(),null);
+    </insert>
+
+    <select id="findByLoginId" parameterType="String" resultType="com.example.board.domain.member.MemberResponse">
+        select
+        <include refid="memberColumns"/>
+        from tb_member
+        where
+        delete_yn=0
+        and login_id = #{value}
+    </select>
+
+    <update id="update" parameterType="com.example.board.domain.member.MemberRequest">
+        update tb_member
+        set modified_data =now()
+        , name=#{name},
+        , gender=#{gender}
+        , birthday=#{birthday}
+        <if test="password != null and password != ''">
+            ,password =#{password]
+        </if>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        update tb_member
+        set delete_yn = 1
+        where id = #{id}
+    </delete>
+
+    <select id="countByLoginId" parameterType="String" resultType="int">
+        select count(*)
+        from tb_member
+        where login_id = #{value}
+    </select>
+
+</mapper>

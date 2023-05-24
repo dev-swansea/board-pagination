@@ -38,13 +38,13 @@ function isValid(target, fieldName, focusTarget) {
 const getJson = (uri, params) => {
     let json = {};
     $.ajax({
-        url: uri,
-        type: "GET",
+        url     : uri,
+        type    : "GET",
         dataType: "JSON",
-        data: params,
-        async: false,
-        success: result => json = result,
-        error: (request, status, error) => {
+        data    : params,
+        async   : false,
+        success : result => json = result,
+        error   : (request, status, error) => {
             console.log(error)
         }
     })
@@ -62,14 +62,14 @@ const callApi = (uri, method, params) => {
     let json = {}
 
     $.ajax({
-        url: uri,
-        type: method,
+        url        : uri,
+        type       : method,
         contentType: "application/json; charset=utf-8",
-        dataType: "JSON",
-        data: (params) ? JSON.stringify(params) : {},
-        async: false,
-        success: result => json = result,
-        error: (reqeust, status, error) => {
+        dataType   : "JSON",
+        data       : (params) ? JSON.stringify(params) : {},
+        async      : false,
+        success    : result => json = result,
+        error      : (reqeust, status, error) => {
             console.log(error)
         }
     })

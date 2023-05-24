@@ -3,8 +3,10 @@ package com.example.board.domain.comment;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED) //access 속성을 이용해서 객체 생성을 protected로 제한합니다.
 public class CommentRequest {
   private Long id;

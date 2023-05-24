@@ -16,6 +16,7 @@ public class CommentController {
 
   @PostMapping("/posts/{postId}/comments")
   public CommentResponse saveComment(@PathVariable final Long postId, @RequestBody final CommentRequest params) {
+    System.out.println();
     Long id = service.saveComment(params);
     return service.findCommentById(id);
   }
